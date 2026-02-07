@@ -1,1212 +1,529 @@
-<html lang="zh-CN"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>自然背景日历应用</title>
-  <!-- Tailwind CSS v3 -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome -->
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <!-- 统一的 Tailwind 配置 -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#0065FD',
-            secondary: '#60a5fa',
-            event1: 'rgba(16,185,129,0.6)', // 绿色
-            event2: 'rgba(139,92,246,0.6)', // 紫色
-            event3: 'rgba(245,158,11,0.6)', // 黄色
-            event4: 'rgba(236,72,153,0.6)', // 粉色
-            event5: 'rgba(6,182,212,0.6)', // 青色
-            event6: 'rgba(239,68,68,0.6)', // 红色
-            event7: 'rgba(132,204,22,0.6)', // 浅绿色
-            event8: 'rgba(99,102,241,0.6)', // 靛蓝色
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-          },
-          animation: {
-            'fade-in': 'fadeIn 0.5s ease-in-out',
-            'fade-in-delay-1': 'fadeIn 0.5s ease-in-out 0.1s forwards',
-            'fade-in-delay-2': 'fadeIn 0.5s ease-in-out 0.2s forwards',
-            'fade-in-delay-3': 'fadeIn 0.5s ease-in-out 0.3s forwards',
-            'fade-in-delay-4': 'fadeIn 0.5s ease-in-out 0.4s forwards',
-            'fade-in-delay-5': 'fadeIn 0.5s ease-in-out 0.5s forwards',
-            'typing': 'typing 1.5s steps(30, end)',
-            'blink': 'blink 1s infinite',
-          },
-          keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(10px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            },
-            typing: {
-              'from': { width: '0' },
-              'to': { width: '100%' },
-            },
-            blink: {
-              'from, to': { borderColor: 'transparent' },
-              '50%': { borderColor: 'white' },
-            },
-          },
-        }
-      }
-    }
-  </script>
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .glass {
-        @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-lg;
-      }
-      .glass-dark {
-        @apply bg-black/10 backdrop-blur-md border border-white/10 shadow-lg;
-      }
-      .text-shadow {
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .transition-all-300 {
-        @apply transition-all duration-300 ease-in-out;
-      }
-    }
-  </style>
-  <style>
-    body {
-      background-image: url('https://p9-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/81694b7a06464edebbca41bd54358abe.jpg~tplv-a9rns2rl98-image-qvalue.image?rcl=2025092214303776F17D9C0CA97F0D8D3F&rk3s=8e244e95&rrcfp=b669a9d6&x-expires=1758609037&x-signature=qUeZTiuU9TfxSpCC7RH6BMjPX7s%3D');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      min-height: 100vh;
-    }
-    
-    .event {
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    
-    .event:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-    
-    .calendar-day {
-      min-height: 120px;
-    }
-    
-    .sidebar-calendar .day {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.2s ease;
-    }
-    
-    .sidebar-calendar .day:hover:not(.empty) {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    .sidebar-calendar .day.active {
-      background-color: #3b82f6;
-      color: white;
-    }
-    
-    .sidebar-calendar .day.today {
-      border: 2px solid #3b82f6;
-    }
-    
-    .ai-assistant-container {
-      position: fixed;
-      bottom: 4px;
-      right: 4px;
-      z-index: 100;
-    }
-    
-    .ai-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-      transition: all 0.3s ease;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .ai-avatar:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-    }
-    
-    .ai-avatar img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    
-    .ai-assistant-popup {
-      position: absolute;
-      bottom: 70px;
-      right: 0;
-      width: 350px;
-      border-radius: 16px;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-      transform-origin: bottom right;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      opacity: 0;
-      transform: scale(0.9);
-      pointer-events: none;
-    }
-    
-    .ai-assistant-popup.show {
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: auto;
-    }
-    
-    .ai-header {
-      background-color: '#0065FD';
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .ai-header-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .ai-header-info {
-      flex: 1;
-    }
-    
-    .ai-header-name {
-      font-weight: 600;
-      font-size: 16px;
-      color: white;
-    }
-    
-    .ai-header-status {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.8);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    
-    .ai-status-indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-    }
-    
-    .ai-chat-container {
-      padding: 16px;
-      height: 250px;
-      overflow-y: auto;
-    }
-    
-    .ai-message {
-      margin-bottom: 16px;
-      display: flex;
-      gap: 10px;
-    }
-    
-    .ai-message-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .ai-message-bubble {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 18px;
-      padding: 12px 16px;
-      max-width: 80%;
-      color: white;
-      font-size: 14px;
-      line-height: 1.4;
-    }
-    
-    .user-message {
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-    
-    .user-message-bubble {
-      background: #3b82f6;
-      border-radius: 18px 18px 0 18px;
-      padding: 12px 16px;
-      max-width: 80%;
-      color: white;
-      font-size: 14px;
-      line-height: 1.4;
-    }
-    
-    .ai-input-container {
-      padding: 12px 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .ai-input {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 10px 16px;
-      color: white;
-      font-size: 14px;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-    
-    .ai-input:focus {
-      border-color: #3b82f6;
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .ai-send-button {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #3b82f6;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .ai-send-button:hover {
-      background: #2563eb;
-      transform: scale(1.05);
-    }
-    
-    .ai-features {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-    
-    .ai-feature-button {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 6px 12px;
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.8);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .ai-feature-button:hover {
-      background: rgba(59, 130, 246, 0.2);
-      border-color: #3b82f6;
-      color: white;
-    }
-    
-    .typing-animation::after {
-      content: '|';
-      animation: blink 1s infinite;
-    }
-    
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    
-    .week-view .time-slot {
-      height: 60px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .week-view .event {
-      position: absolute;
-      left: 0;
-      right: 0;
-      margin: 0 10px;
-      border-radius: 8px;
-      padding: 8px;
-      color: white;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      z-index: 10;
-    }
-    
-    .week-view .event-container {
-      position: relative;
-      height: 60px;
-    }
-    
-
-    
-    .modal {
-      transition: opacity 0.3s ease;
-    }
-    
-    .modal-content {
-      transition: transform 0.3s ease;
-    }
-    
-    .modal.hidden .modal-content {
-      transform: scale(0.95);
-    }
-    
-    .modal:not(.hidden) .modal-content {
-      transform: scale(1);
-    }
-  </style>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Horizon Blog | 个人博客</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="font-sans text-white">
-  <div class="min-h-screen flex flex-col">
-    <!-- 头部 -->
-    <header class="glass rounded-xl mx-4 mt-4 p-4 flex items-center justify-between animate-fade-in">
-      <div class="flex items-center">
-        <h1 class="text-2xl font-bold text-shadow">日历应用</h1>
-      </div>
-      
-      <div class="flex items-center flex-1 justify-end">
-        <div class="relative w-full max-w-sm mr-4">
-          <input type="text" placeholder="搜索..." class="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-white/50">
-          <i class="fa fa-search absolute left-3 top-3 text-white/70"></i>
-        </div>
-      </div>
-      
-      <div class="flex items-center space-x-4">
-        <div class="relative">
-          <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/code_assistant/8644202302414879a52ed33e5a5ee66e~tplv-a9rns2rl98-image.image?rcl=202509221407337E4E838744DF8FAAAA3C&amp;rk3s=8e244e95&amp;rrcfp=e75484ac&amp;x-expires=1759126054&amp;x-signature=FTg%2B1l8FJJWifs8n7dSS10PnxPs%3D" alt="用户头像" class="w-10 h-10 rounded-full object-cover border-2 border-white/30">
-          <span class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></span>
-        </div>
-      </div>
+<body>
+    <!-- 阅读进度指示器 -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <a href="#" class="logo">Blue Horizon</a>
+                <div class="nav-links">
+                    <a href="#home" class="nav-link">首页</a>
+                    <a href="#about" class="nav-link">关于我</a>
+                    <a href="#contact" class="nav-link">联系方式</a>
+                </div>
+                <div class="theme-switch">
+                    <button id="themeToggle" class="theme-btn">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+                <div class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </nav>
     </header>
-    
-    <!-- 主内容区 -->
-    <main class="flex-1 flex p-4 gap-3 mt-4">
-      <!-- 左侧边栏 -->
-      <aside class="w-64 glass rounded-xl p-4 flex flex-col animate-fade-in-delay-1">
-        <!-- 创建按钮 -->
-        <button class="bg-primary hover:bg-secondary text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all-300 mb-6">
-          <i class="fa fa-plus text-sm"></i>
-          
-          <span>创建日程</span>
-        </button>
-        
-        <!-- 迷你日历 -->
-        <div class="sidebar-calendar mb-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="font-medium text-lg">2025年7月</h3>
-            <div class="flex gap-2">
-              <button class="p-1 rounded hover:bg-white/20 transition-all-300">
-                <i class="fa fa-chevron-left"></i>
-              </button>
-              <button class="p-1 rounded hover:bg-white/20 transition-all-300">
-                <i class="fa fa-chevron-right"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- 星期标题 -->
-          <div class="grid grid-cols-7 gap-1 mb-2 text-center text-sm text-white/70">
-            <div>日</div>
-            <div>一</div>
-            <div>二</div>
-            <div>三</div>
-            <div>四</div>
-            <div>五</div>
-            <div>六</div>
-          </div>
-          
-          <!-- 日期网格 -->
-          <div class="grid grid-cols-7 gap-1 text-center">
-            <!-- 第一行 -->
-            <div class="day empty"></div>
-            <div class="day empty"></div>
-            <div class="day">1</div>
-            <div class="day">2</div>
-            <div class="day">3</div>
-            <div class="day">4</div>
-            <div class="day">5</div>
-            
-            <!-- 第二行 -->
-            <div class="day">6</div>
-            <div class="day">7</div>
-            <div class="day">8</div>
-            <div class="day">9</div>
-            <div class="day">10</div>
-            <div class="day">11</div>
-            <div class="day">12</div>
-            
-            <!-- 第三行 -->
-            <div class="day">13</div>
-            <div class="day">14</div>
-            <div class="day">15</div>
-            <div class="day">16</div>
-            <div class="day">17</div>
-            <div class="day">18</div>
-            <div class="day">19</div>
-            
-            <!-- 第四行 -->
-            <div class="day">20</div>
-            <div class="day">21</div>
-            <div class="day">22</div>
-            <div class="day active today">23</div>
-            <div class="day">24</div>
-            <div class="day">25</div>
-            <div class="day">26</div>
-            
-            <!-- 第五行 -->
-            <div class="day">27</div>
-            <div class="day">28</div>
-            <div class="day">29</div>
-            <div class="day">30</div>
-            <div class="day">31</div>
-            <div class="day empty"></div>
-            <div class="day empty"></div>
-          </div>
-        </div>
-        
-        <!-- 我的日历 -->
-        <div class="mt-auto">
-          <h3 class="font-medium text-lg mb-4">我的日历</h3>
-          <ul class="space-y-3">
-            <li class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="w-3 h-3 rounded-full bg-primary"></span>
-                <span>个人</span>
-              </div>
-              <span class="text-white/70">12</span>
-            </li>
-            <li class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="w-3 h-3 rounded-full bg-event1"></span>
-                <span>工作</span>
-              </div>
-              <span class="text-white/70">8</span>
-            </li>
-            <li class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="w-3 h-3 rounded-full bg-event2"></span>
-                <span>家庭</span>
-              </div>
-              <span class="text-white/70">5</span>
-            </li>
-            <li class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <span class="w-3 h-3 rounded-full bg-event3"></span>
-                <span>重要</span>
-              </div>
-              <span class="text-white/70">3</span>
-            </li>
-          </ul>
-        </div>
-      </aside>
-      
-      <!-- 主日历区域 -->
-      <section class="flex-1 glass rounded-xl p-4 flex flex-col animate-fade-in-delay-2">
-        <!-- 日历导航 -->
-        <div class="flex justify-between items-center mb-6">
-          <div class="flex items-center gap-4">
-            <button class="bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg transition-all-300">今天</button>
-            <div class="flex items-center gap-2">
-              <button class="p-2 rounded hover:bg-white/20 transition-all-300">
-                <i class="fa fa-chevron-left"></i>
-              </button>
-              <h2 class="text-xl font-medium">2025年7月</h2>
-              <button class="p-2 rounded hover:bg-white/20 transition-all-300">
-                <i class="fa fa-chevron-right"></i>
-              </button>
-            </div>
-          </div>
-          
-          <div class="flex gap-2">
-            <button class="view-toggle py-2 px-4 rounded-lg bg-white/20 hover:bg-white/30 transition-all-300" data-view="day">日</button>
-            <button class="view-toggle py-2 px-4 rounded-lg bg-primary hover:bg-secondary transition-all-300" data-view="week">周</button>
-            <button class="view-toggle py-2 px-4 rounded-lg bg-white/20 hover:bg-white/30 transition-all-300" data-view="month">月</button>
-          </div>
-        </div>
-        
-        <!-- 周视图 -->
-        <div class="week-view flex-1 overflow-auto">
-          <!-- 日期标题 -->
-          <div class="grid grid-cols-8 gap-1 mb-1">
-            <div class="text-right pr-2 py-2 text-sm font-medium">时间</div>
-            <div class="text-center py-2 text-sm font-medium">周一 7/21</div>
-            <div class="text-center py-2 text-sm font-medium">周二 7/22</div>
-            <div class="text-center py-2 text-sm font-medium bg-white/20 rounded-lg">周三 7/23</div>
-            <div class="text-center py-2 text-sm font-medium">周四 7/24</div>
-            <div class="text-center py-2 text-sm font-medium">周五 7/25</div>
-            <div class="text-center py-2 text-sm font-medium">周六 7/26</div>
-            <div class="text-center py-2 text-sm font-medium">周日 7/27</div>
-          </div>
-          
-          <!-- 时间 slots -->
-          <div class="grid grid-cols-8 gap-1">
-            <!-- 时间列 -->
-            <div class="text-right pr-2 text-sm text-white/70">
-              <div class="time-slot flex items-center justify-end h-16">8:00</div>
-              <div class="time-slot flex items-center justify-end h-16">9:00</div>
-              <div class="time-slot flex items-center justify-end h-16">10:00</div>
-              <div class="time-slot flex items-center justify-end h-16">11:00</div>
-              <div class="time-slot flex items-center justify-end h-16">12:00</div>
-              <div class="time-slot flex items-center justify-end h-16">13:00</div>
-              <div class="time-slot flex items-center justify-end h-16">14:00</div>
-              <div class="time-slot flex items-center justify-end h-16">15:00</div>
-              <div class="time-slot flex items-center justify-end h-16">16:00</div>
-            </div>
-            
-            <!-- 周一 -->
-            <div class="border-l border-white/10">
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event1" style="top: 0; height: 100%;" data-event="1">
-                  <div class="font-medium">团队会议</div>
-                  <div class="text-xs opacity-80">9:00 - 10:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event3" style="top: 0; height: 100%;" data-event="2">
-                  <div class="font-medium">午餐约会</div>
-                  <div class="text-xs opacity-80">12:00 - 13:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event2" style="top: 0; height: 100%;" data-event="3">
-                  <div class="font-medium">客户电话</div>
-                  <div class="text-xs opacity-80">14:00 - 15:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-            </div>
-            
-            <!-- 周二 -->
-            <div class="border-l border-white/10">
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event4" style="top: 0; height: 100%;" data-event="4">
-                  <div class="font-medium">项目进度</div>
-                  <div class="text-xs opacity-80">10:00 - 11:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event5" style="top: 0; height: 100%;" data-event="5">
-                  <div class="font-medium">设计评审</div>
-                  <div class="text-xs opacity-80">13:00 - 14:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event6" style="top: 0; height: 100%;" data-event="6">
-                  <div class="font-medium">健身</div>
-                  <div class="text-xs opacity-80">15:00 - 16:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-            </div>
-            
-            <!-- 周三 -->
-            <div class="border-l border-white/10 bg-white/5">
-              <div class="event-container relative h-16">
-                <div class="event bg-event7" style="top: 0; height: 100%;" data-event="7">
-                  <div class="font-medium">早会</div>
-                  <div class="text-xs opacity-80">8:00 - 9:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event1" style="top: 0; height: 100%;" data-event="8">
-                  <div class="font-medium">团队会议</div>
-                  <div class="text-xs opacity-80">11:00 - 12:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event8" style="top: 0; height: 100%;" data-event="9">
-                  <div class="font-medium">培训</div>
-                  <div class="text-xs opacity-80">14:00 - 15:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event2" style="top: 0; height: 100%;" data-event="10">
-                  <div class="font-medium">客户会议</div>
-                  <div class="text-xs opacity-80">16:00 - 17:00</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 周四 -->
-            <div class="border-l border-white/10">
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event3" style="top: 0; height: 100%;" data-event="11">
-                  <div class="font-medium">规划会议</div>
-                  <div class="text-xs opacity-80">9:00 - 10:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event4" style="top: 0; height: 100%;" data-event="12">
-                  <div class="font-medium">团队建设</div>
-                  <div class="text-xs opacity-80">14:00 - 15:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-            </div>
-            
-            <!-- 周五 -->
-            <div class="border-l border-white/10">
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event5" style="top: 0; height: 100%;" data-event="13">
-                  <div class="font-medium">进度报告</div>
-                  <div class="text-xs opacity-80">10:00 - 11:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event6" style="top: 0; height: 100%;" data-event="14">
-                  <div class="font-medium">午餐</div>
-                  <div class="text-xs opacity-80">12:00 - 13:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event7" style="top: 0; height: 100%;" data-event="15">
-                  <div class="font-medium">周末计划</div>
-                  <div class="text-xs opacity-80">15:00 - 16:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-            </div>
-            
-            <!-- 周六 -->
-            <div class="border-l border-white/10">
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event8" style="top: 0; height: 100%;" data-event="16">
-                  <div class="font-medium">午餐约会</div>
-                  <div class="text-xs opacity-80">12:00 - 13:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-            </div>
-            
-            <!-- 周日 -->
-            <div class="border-l border-white/10">
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16">
-                <div class="event bg-event1" style="top: 0; height: 100%;" data-event="17">
-                  <div class="font-medium">家庭聚餐</div>
-                  <div class="text-xs opacity-80">14:00 - 15:00</div>
-                </div>
-              </div>
-              <div class="event-container relative h-16"></div>
-              <div class="event-container relative h-16"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-    
-      <div class="ai-assistant-container">
-      <!-- AI头像（收起状态） -->
-      <div id="ai-avatar" class="ai-avatar">
-        <img src="https://p9-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/79fd060792db4b858a7607ffab8916f7.png~tplv-a9rns2rl98-image-qvalue.image?rcl=20250922161207AE4713E02B03673981D8&amp;rk3s=8e244e95&amp;rrcfp=b669a9d6&amp;x-expires=1758615127&amp;x-signature=fLP7fRijiZpLbzYIV3xdbHVAc8U%3D" alt="AI助手">
-      </div>
-      
-      <!-- AI助手弹窗（展开状态） -->
-      <div id="ai-assistant" class="ai-assistant-popup">
-        <!-- 头部 -->
-        <div class="ai-header flex justify-between items-center">
-          <div class="ai-header-info">
-            <div class="ai-header-name">智能日历助手</div>
-            <div class="ai-header-status">
-              <span class="ai-status-indicator"></span>
-              <span>在线</span>
-            </div>
-          </div>
-          <button id="close-ai" class="text-white hover:text-gray-200 transition-colors">
-            <i class="fa fa-times"></i>
-          </button>
-        </div>
-        
-        <!-- 聊天内容区 -->
-        <div class="ai-chat-container">
-          <div class="ai-message">
-            <div class="ai-message-bubble w-full">
-              您好！我是您的智能日历助手。我可以帮您查看日程、创建事件、设置提醒等。有什么可以帮您的吗？
-            </div>
-          </div>
-          
-          <!-- 快速功能按钮 -->
-          <div class="ai-features">
-            <div class="ai-feature-button" data-feature="view-today">查看今日日程</div>
-            <div class="ai-feature-button" data-feature="create-event">创建新事件</div>
-            <div class="ai-feature-button" data-feature="set-reminder">设置提醒</div>
-          </div>
-        </div>
-        
-        <!-- 输入区 -->
-        <div class="ai-input-container">
-          <input type="text" id="ai-input" class="ai-input" placeholder="输入您的问题...">
-          <button id="ai-send" class="ai-send-button">
-            <i class="fa fa-paper-plane"></i>
-          </button>
-        </div>
-      </div>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu">
+        <a href="#home" class="mobile-nav-link">首页</a>
+        <a href="#about" class="mobile-nav-link">关于我</a>
+        <a href="#contact" class="mobile-nav-link">联系方式</a>
     </div>
-    
 
-    
-    <!-- 事件详情模态框 -->
-    <div id="event-modal" class="modal fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-      <div class="modal-content glass-dark rounded-xl p-6 w-full max-w-md">
-        <div class="flex justify-between items-center mb-6">
-          <h3 id="event-title" class="text-xl font-bold">团队会议</h3>
-          <button id="close-modal" class="p-1 rounded-full hover:bg-white/20 transition-all-300">
-            <i class="fa fa-times"></i>
-          </button>
+    <!-- 主页横幅 -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>欢迎来到 Blue Horizon</h1>
+                <p>分享技术、生活与旅行的个人空间</p>
+            </div>
         </div>
-        
-        <div class="space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-event1 flex items-center justify-center">
-              <i class="fa fa-calendar text-white"></i>
+    </section>
+
+    <!-- 文章分类筛选 -->
+    <section class="category-filter">
+        <div class="container">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-category="all">全部</button>
+                <button class="filter-btn" data-category="technology">技术</button>
+                <button class="filter-btn" data-category="lifestyle">生活</button>
+                <button class="filter-btn" data-category="travel">旅行</button>
             </div>
-            <div>
-              <p class="text-sm text-white/70">时间</p>
-              <p id="event-time" class="font-medium">2025年7月23日 11:00 - 12:00</p>
-            </div>
-          </div>
-          
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-event2 flex items-center justify-center">
-              <i class="fa fa-map-marker text-white"></i>
-            </div>
-            <div>
-              <p class="text-sm text-white/70">地点</p>
-              <p id="event-location" class="font-medium">会议室 A</p>
-            </div>
-          </div>
-          
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-event3 flex items-center justify-center">
-              <i class="fa fa-users text-white"></i>
-            </div>
-            <div>
-              <p class="text-sm text-white/70">参与者</p>
-              <p id="event-participants" class="font-medium">张明, 李华, 王芳</p>
-            </div>
-          </div>
-          
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-full bg-event4 flex items-center justify-center mt-1">
-              <i class="fa fa-file-text text-white"></i>
-            </div>
-            <div>
-              <p class="text-sm text-white/70">描述</p>
-              <p id="event-description" class="font-medium">讨论本周工作进展和下周计划，准备项目进度报告。</p>
-            </div>
-          </div>
         </div>
-        
-        <div class="mt-6 flex gap-3">
-          <button class="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg transition-all-300">
-            <i class="fa fa-pencil mr-2"></i> 编辑
-          </button>
-          <button class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-all-300">
-            <i class="fa fa-trash mr-2"></i> 删除
-          </button>
+    </section>
+
+    <!-- 文章列表 -->
+    <section class="blog-posts">
+        <div class="container">
+            <div class="posts-grid">
+                <!-- 技术类文章 -->
+                <div class="post-card" data-category="technology">
+                    <div class="post-image">
+                        <img src="https://p11-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/d38094d634f348a48ecc36c506aa731a~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602080044372332B97B24D762198916&rrcfp=f06b921b&x-expires=1773074695&x-signature=H6ymwOXDwl47Qu21oMsBHjVeV60%3D" alt="技术文章">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-category">技术</div>
+                        <h2 class="post-title">探索未来科技趋势</h2>
+                        <p class="post-excerpt">人工智能、区块链、量子计算...这些前沿技术将如何改变我们的生活和工作方式？本文将深入探讨未来科技发展的主要趋势。</p>
+                        <div class="post-meta">
+                            <span class="post-date">2023年6月15日</span>
+                            <span class="post-read-time">5分钟阅读</span>
+                        </div>
+                        <a href="#" class="read-more-btn">阅读全文</a>
+                    </div>
+                </div>
+
+                <!-- 生活类文章 -->
+                <div class="post-card" data-category="lifestyle">
+                    <div class="post-image">
+                        <img src="https://p11-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/a660de8f840a4004a91778eeaddabe56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602080044372332B97B24D762198916&rrcfp=f06b921b&x-expires=1773074700&x-signature=sJ4aElikUGz2I28zTXFFuGB%2BQDk%3D" alt="生活文章">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-category">生活</div>
+                        <h2 class="post-title">简约生活的艺术</h2>
+                        <p class="post-excerpt">在这个信息爆炸的时代，如何通过简约生活理念找回内心的平静与满足？本文分享一些实用的极简主义生活技巧。</p>
+                        <div class="post-meta">
+                            <span class="post-date">2023年5月28日</span>
+                            <span class="post-read-time">4分钟阅读</span>
+                        </div>
+                        <a href="#" class="read-more-btn">阅读全文</a>
+                    </div>
+                </div>
+
+                <!-- 旅行类文章 -->
+                <div class="post-card" data-category="travel">
+                    <div class="post-image">
+                        <img src="https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/8095e6fd66764d4c8914d52268c89d27~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602080044372332B97B24D762198916&rrcfp=f06b921b&x-expires=1773074695&x-signature=44InB5DWdh0raB4rHkTjIbqPfkY%3D" alt="旅行文章">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-category">旅行</div>
+                        <h2 class="post-title">探索蓝色海岸的秘密</h2>
+                        <p class="post-excerpt">地中海沿岸的蓝色海岸以其迷人的风景和丰富的文化遗产吸引着无数游客。本文将带你探索这条海岸线上最值得一游的隐秘景点。</p>
+                        <div class="post-meta">
+                            <span class="post-date">2023年4月12日</span>
+                            <span class="post-read-time">6分钟阅读</span>
+                        </div>
+                        <a href="#" class="read-more-btn">阅读全文</a>
+                    </div>
+                </div>
+
+                <!-- 技术类文章2 -->
+                <div class="post-card" data-category="technology">
+                    <div class="post-image">
+                        <img src="https://p11-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/d38094d634f348a48ecc36c506aa731a~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602080044372332B97B24D762198916&rrcfp=f06b921b&x-expires=1773074695&x-signature=H6ymwOXDwl47Qu21oMsBHjVeV60%3D" alt="技术文章">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-category">技术</div>
+                        <h2 class="post-title">Web开发的未来趋势</h2>
+                        <p class="post-excerpt">从响应式设计到AI驱动的用户体验，Web开发领域正在经历快速变革。本文分析当前最热门的Web开发趋势及其对行业的影响。</p>
+                        <div class="post-meta">
+                            <span class="post-date">2023年3月20日</span>
+                            <span class="post-read-time">7分钟阅读</span>
+                        </div>
+                        <a href="#" class="read-more-btn">阅读全文</a>
+                    </div>
+                </div>
+
+                <!-- 生活类文章2 -->
+                <div class="post-card" data-category="lifestyle">
+                    <div class="post-image">
+                        <img src="https://p11-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/a660de8f840a4004a91778eeaddabe56~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602080044372332B97B24D762198916&rrcfp=f06b921b&x-expires=1773074700&x-signature=sJ4aElikUGz2I28zTXFFuGB%2BQDk%3D" alt="生活文章">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-category">生活</div>
+                        <h2 class="post-title">数字游民的工作生活平衡</h2>
+                        <p class="post-excerpt">远程工作让我们能够在世界各地工作，但如何在享受自由的同时保持高效和健康的生活方式？本文分享数字游民的实用建议。</p>
+                        <div class="post-meta">
+                            <span class="post-date">2023年2月5日</span>
+                            <span class="post-read-time">5分钟阅读</span>
+                        </div>
+                        <a href="#" class="read-more-btn">阅读全文</a>
+                    </div>
+                </div>
+
+                <!-- 旅行类文章2 -->
+                <div class="post-card" data-category="travel">
+                    <div class="post-image">
+                        <img src="https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/8095e6fd66764d4c8914d52268c89d27~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602080044372332B97B24D762198916&rrcfp=f06b921b&x-expires=1773074695&x-signature=44InB5DWdh0raB4rHkTjIbqPfkY%3D" alt="旅行文章">
+                    </div>
+                    <div class="post-content">
+                        <div class="post-category">旅行</div>
+                        <h2 class="post-title">山脉中的宁静 retreat</h2>
+                        <p class="post-excerpt">远离城市的喧嚣，深入山脉寻找内心的宁静。本文推荐几处令人难忘的山地度假胜地，让你重新连接自然与自我。</p>
+                        <div class="post-meta">
+                            <span class="post-date">2023年1月18日</span>
+                            <span class="post-read-time">4分钟阅读</span>
+                        </div>
+                        <a href="#" class="read-more-btn">阅读全文</a>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="https://p9-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/48a9a1a0f846492b99c3d889ec1968a3~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202602080044372332B97B24D762198916&rrcfp=f06b921b&x-expires=1773074693&x-signature=rVzZztCU6r%2FdIuDngqkbLHP%2FaKI%3D" alt="博主头像">
+                </div>
+                <div class="about-text">
+                    <h2>关于我</h2>
+                    <p>你好，我是李明，一名热爱技术、旅行和写作的全栈开发者。在过去的十年里，我一直在科技行业工作，参与过各种规模的项目开发。</p>
+                    <p>除了编程，我也热爱探索新的地方和文化，品尝不同的美食，阅读各类书籍。通过这个博客，我希望能与你分享我的技术见解、生活感悟和旅行体验。</p>
+                    <p>如果你有任何问题或合作意向，欢迎随时联系我！</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系方式 -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2>联系我</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <p>如果你想了解更多信息，或者有任何合作意向，欢迎通过以下方式联系我：</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">
+                            <i class="fab fa-twitter"></i>
+                            <span>Twitter</span>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-linkedin"></i>
+                            <span>LinkedIn</span>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">邮箱</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">留言</label>
+                            <textarea id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">发送消息</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>Blue Horizon Blog</h3>
+                    <p>分享技术、生活与旅行的个人空间</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#home">首页</a>
+                    <a href="#about">关于我</a>
+                    <a href="#contact">联系方式</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 Blue Horizon Blog. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 文章详情模态框 -->
+    <div class="modal" id="postModal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="modal-body">
+                <div class="modal-post-header">
+                    <div class="post-category" id="modalCategory"></div>
+                    <h2 id="modalTitle"></h2>
+                    <div class="post-meta">
+                        <span class="post-date" id="modalDate"></span>
+                        <span class="post-read-time" id="modalReadTime"></span>
+                    </div>
+                </div>
+                <div class="modal-post-content" id="modalContent">
+                    <!-- 文章内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // 事件数据
-    const events = [
-      {
-        id: 1,
-        title: "团队会议",
-        time: "2025年7月21日 9:00 - 10:00",
-        location: "会议室 A",
-        participants: "张明, 李华, 王芳",
-        description: "讨论本周工作进展和下周计划，准备项目进度报告。",
-        color: "event1"
-      },
-      {
-        id: 2,
-        title: "午餐约会",
-        time: "2025年7月21日 12:00 - 13:00",
-        location: "餐厅 B",
-        participants: "李华",
-        description: "讨论项目合作细节，确定下一步行动计划。",
-        color: "event3"
-      },
-      {
-        id: 3,
-        title: "客户电话",
-        time: "2025年7月21日 14:00 - 15:00",
-        location: "线上",
-        participants: "客户代表",
-        description: "沟通项目需求变更，协商解决方案。",
-        color: "event2"
-      },
-      {
-        id: 4,
-        title: "项目进度",
-        time: "2025年7月22日 10:00 - 11:00",
-        location: "会议室 C",
-        participants: "项目团队",
-        description: "检查项目进度，解决遇到的问题和挑战。",
-        color: "event4"
-      },
-      {
-        id: 5,
-        title: "设计评审",
-        time: "2025年7月22日 13:00 - 14:00",
-        location: "设计室",
-        participants: "设计团队, 产品经理",
-        description: "评审新功能设计方案，收集反馈意见。",
-        color: "event5"
-      },
-      {
-        id: 6,
-        title: "健身",
-        time: "2025年7月22日 15:00 - 16:00",
-        location: "健身房",
-        participants: "个人",
-        description: "保持身体健康，提高工作效率。",
-        color: "event6"
-      },
-      {
-        id: 7,
-        title: "早会",
-        time: "2025年7月23日 8:00 - 9:00",
-        location: "会议室 A",
-        participants: "全体员工",
-        description: "每日例行会议，同步公司最新动态。",
-        color: "event7"
-      },
-      {
-        id: 8,
-        title: "团队会议",
-        time: "2025年7月23日 11:00 - 12:00",
-        location: "会议室 A",
-        participants: "张明, 李华, 王芳",
-        description: "讨论本周工作进展和下周计划，准备项目进度报告。",
-        color: "event1"
-      },
-      {
-        id: 9,
-        title: "培训",
-        time: "2025年7月23日 14:00 - 15:00",
-        location: "培训室",
-        participants: "部门员工",
-        description: "新工具使用培训，提高工作效率。",
-        color: "event8"
-      },
-      {
-        id: 10,
-        title: "客户会议",
-        time: "2025年7月23日 16:00 - 17:00",
-        location: "客户办公室",
-        participants: "客户团队, 项目团队",
-        description: "项目演示和进度汇报，收集客户反馈。",
-        color: "event2"
-      }
-    ];
-    
-    // DOM 加载完成后执行
-    document.addEventListener('DOMContentLoaded', function() {
-      // AI 助手交互
-      const aiAvatar = document.getElementById('ai-avatar');
-      const aiAssistant = document.getElementById('ai-assistant');
-      const closeAi = document.getElementById('close-ai');
-      const aiInput = document.getElementById('ai-input');
-      const aiSend = document.getElementById('ai-send');
-      const aiChatContainer = document.querySelector('.ai-chat-container');
-      
-      // 显示/隐藏 AI 助手
-      function toggleAiAssistant() {
-        aiAssistant.classList.toggle('show');
-      }
-      
-      // 点击 AI 头像显示/隐藏助手
-      aiAvatar.addEventListener('click', toggleAiAssistant);
-      
-      // 点击关闭按钮隐藏助手
-      closeAi.addEventListener('click', function(e) {
-        e.stopPropagation();
-        aiAssistant.classList.remove('show');
-      });
-      
-      // 3秒后自动显示 AI 助手
-      setTimeout(function() {
-        aiAssistant.classList.add('show');
-      }, 3000);
-      
-      // 发送消息
-      function sendMessage() {
-        const message = aiInput.value.trim();
-        if (message) {
-          // 添加用户消息
-          addUserMessage(message);
-          
-          // 清空输入框
-          aiInput.value = '';
-          
-          // 模拟 AI 回复
-          setTimeout(function() {
-            const response = getAiResponse(message);
-            addAiMessage(response);
-          }, 1000);
-        }
-      }
-      
-      // 添加用户消息到聊天窗口
-      function addUserMessage(message) {
-        const userMessageDiv = document.createElement('div');
-        userMessageDiv.className = 'user-message';
-        userMessageDiv.innerHTML = `
-          <div class="user-message-bubble">${message}</div>
-        `;
-        aiChatContainer.appendChild(userMessageDiv);
-        aiChatContainer.scrollTop = aiChatContainer.scrollHeight;
-      }
-      
-      // 添加 AI 消息到聊天窗口
-      function addAiMessage(message) {
-        const aiMessageDiv = document.createElement('div');
-        aiMessageDiv.className = 'ai-message';
-        aiMessageDiv.innerHTML = `
-          <div class="ai-message-bubble">${message}</div>
-        `;
-        aiChatContainer.appendChild(aiMessageDiv);
-        aiChatContainer.scrollTop = aiChatContainer.scrollHeight;
-      }
-      
-      // 模拟 AI 回复
-      function getAiResponse(message) {
-        message = message.toLowerCase();
-        
-        if (message.includes('你好') || message.includes('hi') || message.includes('hello')) {
-          return '您好！我是您的智能日历助手。有什么可以帮您的吗？';
-        } else if (message.includes('今日') || message.includes('今天') || message.includes('日程')) {
-          return '您今天有以下日程安排：\n1. 早会 (8:00 - 9:00)\n2. 团队会议 (11:00 - 12:00)\n3. 培训 (14:00 - 15:00)\n4. 客户会议 (16:00 - 17:00)';
-        } else if (message.includes('创建') || message.includes('添加') || message.includes('事件')) {
-          return '您可以点击左侧的"创建"按钮来添加新事件，或者告诉我您想创建的事件详情，我可以帮您快速创建。';
-        } else if (message.includes('提醒') || message.includes('闹钟')) {
-          return '您可以为任何事件设置提醒。需要我帮您设置哪个事件的提醒吗？';
-        } else if (message.includes('帮助') || message.includes('功能')) {
-          return '我可以帮您：\n- 查看日程安排\n- 创建和编辑事件\n- 设置提醒\n- 搜索特定事件\n- 提供会议建议\n您可以直接告诉我您需要什么帮助。';
-        } else {
-          return '抱歉，我不太理解您的意思。您可以询问我关于日程安排、事件创建或提醒设置的问题，我会尽力帮助您。';
-        }
-      }
-      
-      // 点击发送按钮发送消息
-      aiSend.addEventListener('click', sendMessage);
-      
-      // 按回车键发送消息
-      aiInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          sendMessage();
-        }
-      });
-      
-      // 快速功能按钮点击事件
-      document.querySelectorAll('.ai-feature-button').forEach(function(button) {
-        button.addEventListener('click', function() {
-          const feature = this.getAttribute('data-feature');
-          
-          switch(feature) {
-            case 'view-today':
-              addUserMessage('查看今日日程');
-              setTimeout(function() {
-                addAiMessage('您今天有以下日程安排：\n1. 早会 (8:00 - 9:00)\n2. 团队会议 (11:00 - 12:00)\n3. 培训 (14:00 - 15:00)\n4. 客户会议 (16:00 - 17:00)');
-              }, 1000);
-              break;
-            case 'create-event':
-              addUserMessage('创建新事件');
-              setTimeout(function() {
-                addAiMessage('您可以点击左侧的"创建"按钮来添加新事件，或者告诉我您想创建的事件详情（如标题、时间、地点），我可以帮您快速创建。');
-              }, 1000);
-              break;
-            case 'set-reminder':
-              addUserMessage('设置提醒');
-              setTimeout(function() {
-                addAiMessage('您可以为任何事件设置提醒。需要我帮您设置哪个事件的提醒吗？例如："为下午3点的会议设置提醒"');
-              }, 1000);
-              break;
-          }
-        });
-      });
-      
-      // 事件点击处理
-      document.querySelectorAll('.event').forEach(function(eventEl) {
-        eventEl.addEventListener('click', function() {
-          const eventId = parseInt(this.getAttribute('data-event'));
-          const event = events.find(e => e.id === eventId);
-          
-          if (event) {
-            document.getElementById('event-title').textContent = event.title;
-            document.getElementById('event-time').textContent = event.time;
-            document.getElementById('event-location').textContent = event.location;
-            document.getElementById('event-participants').textContent = event.participants;
-            document.getElementById('event-description').textContent = event.description;
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 主题切换功能
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
             
-            // 设置事件颜色
-            const modal = document.getElementById('event-modal');
-            modal.querySelector('.modal-content').style.borderLeft = `4px solid var(--tw-color-${event.color})`;
+            // 检查本地存储中的主题偏好
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-theme');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
             
-            // 显示模态框
-            modal.classList.remove('hidden');
-          }
-        });
-      });
-      
-      // 关闭事件详情模态框
-      document.getElementById('close-modal').addEventListener('click', function() {
-        document.getElementById('event-modal').classList.add('hidden');
-      });
-      
-      // 点击模态框外部关闭
-      document.getElementById('event-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          this.classList.add('hidden');
-        }
-      });
-      
-      // 视图切换
-      document.querySelectorAll('.view-toggle').forEach(function(button) {
-        button.addEventListener('click', function() {
-          // 移除所有按钮的活动状态
-          document.querySelectorAll('.view-toggle').forEach(btn => {
-            btn.classList.remove('bg-primary', 'hover:bg-secondary');
-            btn.classList.add('bg-white/20', 'hover:bg-white/30');
-          });
-          
-          // 添加当前按钮的活动状态
-          this.classList.remove('bg-white/20', 'hover:bg-white/30');
-          this.classList.add('bg-primary', 'hover:bg-secondary');
-          
-          // 这里可以添加视图切换的逻辑
-          const viewType = this.getAttribute('data-view');
-          console.log(`切换到${viewType}视图`);
-          
-          // 模拟视图切换效果
-          const weekView = document.querySelector('.week-view');
-          weekView.classList.add('opacity-0');
-          
-          setTimeout(() => {
-            // 这里可以根据 viewType 加载不同的视图内容
-            weekView.classList.remove('opacity-0');
-          }, 300);
-        });
-      });
-      
-      // 日期点击处理
-      document.querySelectorAll('.sidebar-calendar .day:not(.empty)').forEach(function(day) {
-        day.addEventListener('click', function() {
-          // 移除所有日期的活动状态
-          document.querySelectorAll('.sidebar-calendar .day').forEach(d => {
-            d.classList.remove('active');
-          });
-          
-          // 添加当前日期的活动状态
-          this.classList.add('active');
-        });
-      });
-      
-
-      
-      // 搜索功能
-      const searchInput = document.querySelector('header input');
-      
-      searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          const searchTerm = this.value.trim();
-          if (searchTerm) {
-            console.log(`搜索: ${searchTerm}`);
-            // 这里可以添加搜索逻辑
+            themeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-theme');
+                
+                if (body.classList.contains('dark-theme')) {
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                    localStorage.setItem('theme', 'light');
+                }
+            });
             
-            // 模拟搜索结果提示
-            alert(`搜索结果: ${searchTerm}`);
-          }
-        }
-      });
-      
-      // 创建按钮点击处理
-      const createButton = document.querySelector('aside button');
-      
-      createButton.addEventListener('click', function() {
-        console.log('创建新事件');
-        // 这里可以添加创建新事件的逻辑
-        
-        // 模拟创建事件提示
-        alert('创建新事件');
-      });
-    });
-  </script>
-
-
-</body></html>
+            // 移动端菜单功能
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('active');
+            });
+            
+            // 点击移动端菜单项后关闭菜单
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                });
+            });
+            
+            // 文章分类筛选功能
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const postCards = document.querySelectorAll('.post-card');
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    filterBtns.forEach(btn => btn.classList.remove('active'));
+                    // 给当前点击的按钮添加active类
+                    this.classList.add('active');
+                    
+                    const category = this.getAttribute('data-category');
+                    
+                    postCards.forEach(card => {
+                        if (category === 'all' || card.getAttribute('data-category') === category) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // 文章详情模态框功能
+            const modal = document.getElementById('postModal');
+            const closeBtn = document.querySelector('.close-btn');
+            const readMoreBtns = document.querySelectorAll('.read-more-btn');
+            
+            // 模拟文章内容数据
+            const postContents = {
+                '探索未来科技趋势': `
+                    <p>人工智能、区块链、量子计算...这些前沿技术将如何改变我们的生活和工作方式？本文将深入探讨未来科技发展的主要趋势。</p>
+                    
+                    <h3>人工智能的进化</h3>
+                    <p>人工智能技术正在以前所未有的速度发展，从自动驾驶汽车到智能医疗诊断，AI正在各行各业发挥越来越重要的作用。未来几年，我们将看到更多AI应用融入日常生活，包括个性化教育、智能家居和智能城市等领域。</p>
+                    
+                    <h3>区块链的潜力</h3>
+                    <p>区块链技术不仅仅是加密货币的基础，它还具有改变供应链管理、投票系统、知识产权保护等多个领域的潜力。随着技术的成熟和监管框架的完善，区块链将在未来几年内实现更广泛的应用。</p>
+                    
+                    <h3>量子计算的突破</h3>
+                    <p>虽然量子计算仍处于早期阶段，但它已经展现出解决传统计算机无法解决的复杂问题的潜力。从药物研发到材料科学，量子计算有望在未来十年内带来革命性的突破。</p>
+                    
+                    <h3>结论</h3>
+                    <p>这些前沿技术的发展将为我们的社会带来巨大的变革和机遇。作为技术从业者和普通公民，我们需要保持开放的心态，积极学习和适应这些变化，才能在未来的技术浪潮中把握机会。</p>
+                `,
+                '简约生活的艺术': `
+                    <p>在这个信息爆炸的时代，如何通过简约生活理念找回内心的平静与满足？本文分享一些实用的极简主义生活技巧。</p>
+                    
+                    <h3>数字断舍离</h3>
+                    <p>我们每天被无数的通知、邮件和社交媒体更新所淹没。尝试每天设定一段"无屏幕时间"，关闭不必要的通知，定期清理邮箱和社交媒体关注列表，让数字生活更加精简和有意义。</p>
+                    
+                    <h3>物质极简主义</h3>
+                    <p>"少即是多"不仅仅是一句口号，更是一种生活态度。定期审视自己的物品，问自己：这件物品是否真的有用或带来快乐？通过减少不必要的物品，我们可以为生活腾出更多空间和精力。</p>
+                    
+                    <h3>时间管理</h3>
+                    <p>学会说"不"，为真正重要的事情留出时间。制定明确的优先级，避免多任务处理，专注于当下正在做的事情。记住，我们的时间是有限的资源，应该用在真正有价值的事情上。</p>
+                    
+                    <h3>结论</h3>
+                    <p>简约生活不是关于剥夺，而是关于选择。通过有意识地选择我们的物品、活动和注意力焦点，我们可以创造一个更加平静、满足和有意义的生活。</p>
+                `,
+                '探索蓝色海岸的秘密': `
+                    <p>地中海沿岸的蓝色海岸以其迷人的风景和丰富的文化遗产吸引着无数游客。本文将带你探索这条海岸线上最值得一游的隐秘景点。</p>
+                    
+                    <h3>隐秘的海湾</h3>
+                    <p>远离拥挤的旅游热点，蓝色海岸沿线分布着许多隐秘的小海湾，那里的海水清澈见底，沙滩洁白细腻。其中最值得一游的包括Esterel山脉附近的Plage de l'Almanarre和Cap Ferrat半岛上的Plage Mala。</p>
+                    
+                    <h3>历史小镇</h3>
+                    <p>除了美丽的海滩，蓝色海岸还有许多保存完好的历史小镇。从山顶的Eze Village到香水之都Grasse，每一个小镇都有其独特的魅力和历史故事。漫步在这些小镇的 narrow streets，仿佛穿越回中世纪。</p>
+                    
+                    <h3>美食探索</h3>
+                    <p>蓝色海岸地区的美食融合了地中海的新鲜食材和普罗旺斯的烹饪传统。不要错过当地的bouillabaisse鱼汤、ratatouille蔬菜杂烩和socca煎饼。记得搭配一杯当地产的rosé葡萄酒，享受真正的普罗旺斯风味。</p>
+                    
+                    <h3>结论</h3>
+                    <p>蓝色海岸不仅仅是一个度假胜地，更是一个充满历史、文化和自然美景的宝藏。通过探索这些隐秘的景点，你将获得一个全新的视角，真正领略这片蓝色海岸的独特魅力。</p>
+                `,
+                'Web开发的未来趋势': `
+                    <p>从响应式设计到AI驱动的用户体验，Web开发领域正在经历快速变革。本文分析当前最热门的Web开发趋势及其对行业的影响。</p>
+                    
+                    <h3>渐进式Web应用(PWAs)</h3>
+                    <p>PWAs结合了Web和原生应用的优点，提供离线功能、推送通知和类似原生应用的用户体验。随着浏览器支持的不断完善，PWAs将成为未来Web开发的重要方向。</p>
+                    
+                    <h3>人工智能和机器学习</h3>
+                    <p>AI和ML正在改变Web开发的方式，从个性化内容推荐到智能客服聊天机器人。未来，我们将看到更多AI驱动的Web应用，提供更加个性化和智能化的用户体验。</p>
+                    
+                    <h3>无代码/低代码平台</h3>
+                    <p>无代码和低代码平台正在使Web开发变得更加民主化，允许非技术人员创建复杂的Web应用。这一趋势将继续发展，改变传统的Web开发流程和团队结构。</p>
+                    
+                    <h3>结论</h3>
+                    <p>Web开发领域正在经历前所未有的变革，新技术和方法不断涌现。作为Web开发者，我们需要保持学习的热情，不断更新我们的技能和知识，才能在这个快速变化的行业中保持竞争力。</p>
+                `,
+                '数字游民的工作生活平衡': `
+                    <p>远程工作让我们能够在世界各地工作，但如何在享受自由的同时保持高效和健康的生活方式？本文分享数字游民的实用建议。</p>
+                    
+                    <h3>建立日常routine</h3>
+                    <p>虽然数字游民的生活看起来很自由，但建立一个稳定的日常routine对于保持 productivity和心理健康至关重要。设定固定的工作时间，创建专门的工作空间，有助于在工作和生活之间建立清晰的界限。</p>
+                    
+                    <h3>管理时间和注意力</h3>
+                    <p>当你可以在任何时间、任何地点工作时，时间管理变得更加重要。使用时间跟踪工具，设定明确的目标和截止日期，避免工作和生活的界限变得模糊。</p>
+                    
+                    <h3>社交和网络</h3>
+                    <p>数字游民的生活可能会感到孤独，因此主动建立社交网络非常重要。参加当地的meetup、加入数字游民社区、使用co-working空间，都是扩展社交圈和专业网络的好方法。</p>
+                    
+                    <h3>结论</h3>
+                    <p>数字游民生活方式提供了前所未有的自由和灵活性，但也需要更多的自律和规划。通过建立良好的习惯和routine，你可以享受数字游民生活的好处，同时保持工作效率和生活质量的平衡。</p>
+                `,
+                '山脉中的宁静 retreat': `
+                    <p>远离城市的喧嚣，深入山脉寻找内心的宁静。本文推荐几处令人难忘的山地度假胜地，让你重新连接自然与自我。</p>
+                    
+                    <h3>阿尔卑斯山的隐秘小屋</h3>
+                    <p>远离繁忙的滑雪胜地，阿尔卑斯山脉中隐藏着许多传统的山间小屋，提供简单而舒适的住宿和令人惊叹的山景。在这里，你可以徒步、滑雪、冥想，或者只是坐在炉火旁，聆听大自然的声音。</p>
+                    
+                    <h3>喜马拉雅山的静修中心</h3>
+                    <p>喜马拉雅山脉不仅是世界上最高的山脉，也是许多精神传统的发源地。在喜马拉雅山的静修中心，你可以参加瑜伽和冥想课程，学习古老的智慧，重新连接内心的平静。</p>
+                    
+                    <h3>落基山脉的荒野体验</h3>
+                    <p>落基山脉提供了丰富的户外活动和自然体验，从徒步和露营到野生动物观察和摄影。在这里，你可以完全沉浸在大自然中，远离现代生活的干扰，找回内心的宁静。</p>
+                    
+                    <h3>结论</h3>
+                    <p>山脉有一种特殊的力量，能够让我们放慢脚步，重新连接自然和自我。无论是短期的度假还是长期的 retreat，山地体验都能帮助我们摆脱日常的压力和焦虑，找回内心的平静和清晰。</p>
+                `
+            };
+            
+            // 打开模态框
+            readMoreBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const postCard = this.closest('.post-card');
+                    const title = postCard.querySelector('.post-title').textContent;
+                    const category = postCard.querySelector('.post-category').textContent;
+                    const date = postCard.querySelector('.post-date').textContent;
+                    const readTime = postCard.querySelector('.post-read-time').textContent;
+                    
+                    // 填充模态框内容
+                    document.getElementById('modalTitle').textContent = title;
+                    document.getElementById('modalCategory').textContent = category;
+                    document.getElementById('modalDate').textContent = date;
+                    document.getElementById('modalReadTime').textContent = readTime;
+                    document.getElementById('modalContent').innerHTML = postContents[title];
+                    
+                    // 显示模态框
+                    modal.style.display = 'block';
+                    document.body.style.overflow = 'hidden'; // 防止背景滚动
+                });
+            });
+            
+            // 关闭模态框
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // 恢复背景滚动
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // 阅读进度条功能
+            window.addEventListener('scroll', function() {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                document.getElementById('progressBar').style.width = scrolled + '%';
+            });
+            
+            // 联系表单提交
+            const contactForm = document.getElementById('contactForm');
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const message = document.getElementById('message').value;
+                
+                // 模拟表单提交
+                alert(`感谢您的留言，${name}！我会尽快回复您。`);
+                contactForm.reset();
+            });
+            
+            // 平滑滚动功能
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80, // 减去导航栏高度
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
