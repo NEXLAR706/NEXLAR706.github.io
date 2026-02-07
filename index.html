@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 页面标题，会显示在浏览器标签 -->
+    <title>我的个人博客 | 你的名字</title>
+    <!-- 引入自定义样式文件 -->
+    <link rel="stylesheet" href="style.css">
+    <!-- 可选：引入第三方样式（比如字体、图标） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <!-- 头部导航栏 -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo"><a href="/">我的个人博客</a></h1>
+            <nav class="nav">
+                <a href="#home">首页</a>
+                <a href="#articles">文章</a>
+                <a href="#about">关于我</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 首页内容区 -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h2>你好，我是<span>你的名字</span></h2>
+            <p>一个热爱编程的开发者，分享技术与成长</p>
+            <a href="#articles" class="btn">查看我的文章</a>
+        </div>
+    </section>
+
+    <!-- 文章列表区 -->
+    <section id="articles" class="articles">
+        <div class="container">
+            <h2>我的博客文章</h2>
+            <div class="article-list">
+                <!-- 文章1 -->
+                <div class="article-item">
+                    <h3><a href="articles/2026-02-08-first-article.html">我的第一篇博客</a></h3>
+                    <p class="date">发布于：2026-02-08</p>
+                    <p class="summary">这是我用 GitHub Pages 搭建的第一个博客页面，纯手写 HTML/CSS，简单又自由～</p>
+                </div>
+                <!-- 文章2（示例） -->
+                <div class="article-item">
+                    <h3><a href="articles/2026-02-09-second-article.html">HTML 基础知识点总结</a></h3>
+                    <p class="date">发布于：2026-02-09</p>
+                    <p class="summary">整理了 HTML 常用标签和语义化布局的小技巧，适合新手学习。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2>关于我</h2>
+            <img src="images/avatar.jpg" alt="头像" class="avatar">
+            <p>GitHub：<a href="https://github.com/你的用户名" target="_blank">@你的用户名</a></p>
+            <p>邮箱：your-email@example.com</p>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 我的个人博客 | 基于 GitHub Pages 搭建</p>
+        </div>
+    </footer>
+</body>
+</html>
