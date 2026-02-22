@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页导航</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            padding: 15px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .search-box {
+            background: white;
+            max-width: 500px;
+            margin: 20px auto;
+            border-radius: 50px;
+            padding: 5px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            background: transparent;
+        }
+        
+        .search-box i {
+            color: #6a11cb;
+            font-size: 1.3rem;
+        }
+        
+        .sites-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .site-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px 15px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .site-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+            background: white;
+        }
+        
+        .site-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            color: #6a11cb;
+            font-size: 1.5rem;
+        }
+        
+        .site-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-align: center;
+            line-height: 1.3;
+        }
+        
+        @media (max-width: 768px) {
+            .sites-container {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .site-card {
+                padding: 15px 10px;
+            }
+            
+            .site-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+            
+            .site-name {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .sites-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+            
+            .search-box {
+                width: 90%;
+            }
+            
+            .site-card {
+                padding: 12px 8px;
+            }
+            
+            .site-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                margin-bottom: 8px;
+            }
+            
+            .site-name {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>网页导航</h1>
+            
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="搜索...">
+            </div>
+        </header>
+        
+        <div class="sites-container">
+            <a href="https://www.7-zip.org/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <div class="site-name">7-zip</div>
+            </a>
+            
+            <a href="https://www.123pan.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <div class="site-name">123云盘</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/i2Vr134cooha#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="site-name">adb</div>
+            </a>
+            
+            <a href="https://github.com/RamonUnch/AltSnap/releases/tag/1.67" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-window-maximize"></i>
+                </div>
+                <div class="site-name">AltSnap</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/iZch132vrarg#1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-file-archive"></i>
+                </div>
+                <div class="site-name">Bandizip</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/ivU3j330u3lg#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="site-name">BetterNCM</div>
+            </a>
+            
+            <a href="https://store.epicgames.com/zh-CN/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <div class="site-name">Epic Games</div>
+            </a>
+            
+            <a href="https://www.voidtools.com/zh-cn/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="site-name">Everything</div>
+            </a>
+            
+            <a href="https://github.com/valinet/ExplorerPatcher" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-wrench"></i>
+                </div>
+                <div class="site-name">ExplorerPatcher</div>
+            </a>
+            
+            <a href="https://www.firpe.cn/?sid=U3FOqN" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-compact-disc"></i>
+                </div>
+                <div class="site-name">FirPE</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/iSVu4347l9xi#密码:11" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="site-name">Fliqlo</div>
+            </a>
+            
+            <a href="https://wwbie.lanzoue.com/iVaMq3cfw5tc#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="site-name">InnoSetup编译器</div>
+            </a>
+            
+            <a href="https://localsend.org/zh-CN/download?os=windows" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-share-alt"></i>
+                </div>
+                <div class="site-name">LocalSend</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/iJOYt32z482f#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="site-name">MiniPassword_Number</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/i2WeU336do6b#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-save"></i>
+                </div>
+                <div class="site-name">Miside存档</div>
+            </a>
+            
+            <a href="https://motrix.app/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div class="site-name">Motrix</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/ihHBM2xpgs8d#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-puzzle-piece"></i>
+                </div>
+                <div class="site-name">Nexus</div>
+            </a>
+            
+            <a href="https://obsproject.com/download" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="site-name">OBS</div>
+            </a>
+            
+            <a href="https://pixpin.cn/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div class="site-name">PixPin</div>
+            </a>
+            
+            <a href="https://github.com/microsoft/PowerToys/releases" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="site-name">Powertoys</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/iWhOi2xr2h0h#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fab fa-python"></i>
+                </div>
+                <div class="site-name">Python-3.13.1</div>
+            </a>
+            
+            <a href="https://im.qq.com/pcqq/index.shtml" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fab fa-qq"></i>
+                </div>
+                <div class="site-name">QQ</div>
+            </a>
+            
+            <a href="https://builds.rainmeter.net/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="site-name">Rainmeter</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/b00uzeb7yd#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div class="site-name">Sketchup</div>
+            </a>
+            
+            <a href="https://store.steampowered.com/about/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fab fa-steam"></i>
+                </div>
+                <div class="site-name">Steam</div>
+            </a>
+            
+            <a href="https://www.dogfight360.com/blog/18682/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-plug"></i>
+                </div>
+                <div class="site-name">steamcommunity_302</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/iRuy8374qlwj#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="site-name">Thunder v11.1.12.1692</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/iWlB432vuvve#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="site-name">Thunder v11.2.2.1716</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/i1fVS32z3qkf#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <div class="site-name">TransIucentTB</div>
+            </a>
+            
+            <a href="https://uuyc.163.com/download/?source_channel=gwgame" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <div class="site-name">UU远程</div>
+            </a>
+            
+            <a href="https://code.visualstudio.com/download" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <div class="site-name">VisualStudio Code</div>
+            </a>
+            
+            <a href="https://share.feijipan.com/s/rTOQEyiS" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <div class="site-name">VMware虚拟机</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/b00uzdn2yj#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="site-name">Wallpaper Engine</div>
+            </a>
+            
+            <a href="https://winnew.cn/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-windows"></i>
+                </div>
+                <div class="site-name">Windows第三方镜像网站</div>
+            </a>
+            
+            <a href="https://share.feijipan.com/s/4yOU4P0W" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-file-word"></i>
+                </div>
+                <div class="site-name">WPS Office 12.1.0.21541</div>
+            </a>
+            
+            <a href="https://www.alipan.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="site-name">阿里云盘</div>
+            </a>
+            
+            <a href="https://wwbie.lanzoue.com/iAVhP3e3b6xg#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="site-name">安易加速器</div>
+            </a>
+            
+            <a href="https://pan.baidu.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-cloud-download-alt"></i>
+                </div>
+                <div class="site-name">百度云盘</div>
+            </a>
+            
+            <a href="https://jiasu.bohe.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <div class="site-name">薄荷加速器</div>
+            </a>
+            
+            <a href="https://app.bilibili.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+                <div class="site-name">哔哩哔哩</div>
+            </a>
+            
+            <a href="https://wiki.biligame.com/dwrg/PC%E4%BA%92%E9%80%9A%E7%89%88" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <div class="site-name">第五人格</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/ipy7B2xpguif#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <div class="site-name">第五人格登录器</div>
+            </a>
+            
+            <a href="https://www.douyin.com/downloadpage/pc" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="site-name">抖音</div>
+            </a>
+            
+            <a href="http://4275.com/2ctzuk" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <div class="site-name">鲁大师</div>
+            </a>
+            
+            <a href="http://4275.com/k4hesn" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <div class="site-name">鲁大师精简版6.1024.4050.809</div>
+            </a>
+            
+            <a href="https://www.mini1.cn/index" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div class="site-name">迷你世界</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/b00uzdn37i#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fab fa-android"></i>
+                </div>
+                <div class="site-name">适用于Android的Windows子系统</div>
+            </a>
+            
+            <a href="https://cpc.icloud.cn/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <div class="site-name">顺网云电脑</div>
+            </a>
+            
+            <a href="https://www.tbtool.cn/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-toolbox"></i>
+                </div>
+                <div class="site-name">图吧工具箱</div>
+            </a>
+            
+            <a href="https://music.163.com/#/download" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="site-name">网易云音乐</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/iht9H33iop1a#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="site-name">微软常用运行库合集2024.11.07</div>
+            </a>
+            
+            <a href="https://pc.weixin.qq.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fab fa-weixin"></i>
+                </div>
+                <div class="site-name">微信</div>
+            </a>
+            
+            <a href="https://z.weixin.qq.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-keyboard"></i>
+                </div>
+                <div class="site-name">微信输入法</div>
+            </a>
+            
+            <a href="https://www.msi.cn/Landing/afterburner/graphics-cards" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div class="site-name">微星小飞机</div>
+            </a>
+            
+            <a href="https://val.qq.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-fist-raised"></i>
+                </div>
+                <div class="site-name">无畏契约</div>
+            </a>
+            
+            <a href="https://wwvs.lanzoue.com/iBEXh32xg97g#密码:1234" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="site-name">迅雷X v10.1.38.890</div>
+            </a>
+            
+            <a href="https://cmwtat.cloudmoe.com/cn.html?hulian+tuijian" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-unlock"></i>
+                </div>
+                <div class="site-name">云萌Windows+激活工具</div>
+            </a>
+
+            <a href="https://www.netmount.cn/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-unlock"></i>
+                </div>
+                <div class="site-name">NetMount</div>
+            </a>
+
+            <a href="https://uu.163.com/" target="_blank" class="site-card">
+                <div class="site-icon">
+                    <i class="fas fa-unlock"></i>
+                </div>
+                <div class="site-name">UU加速器</div>
+            </a>
+
+        </div>
+    </div>
+
+    <script>
+        // 搜索功能实现
+        const searchInput = document.querySelector('.search-box input');
+        const siteCards = document.querySelectorAll('.site-card');
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            siteCards.forEach(card => {
+                const siteName = card.querySelector('.site-name').textContent.toLowerCase();
+                
+                if (siteName.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
