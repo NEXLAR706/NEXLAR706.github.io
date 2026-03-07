@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页导航</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .description {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .search-box {
+            background: white;
+            max-width: 500px;
+            margin: 30px auto;
+            border-radius: 50px;
+            padding: 5px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            background: transparent;
+        }
+        
+        .search-box i {
+            color: #6a11cb;
+            font-size: 1.3rem;
+        }
+        
+        .sites-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .site-card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .site-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            background: #f0f0f0;
+        }
+        
+        .site-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #6a11cb;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .site-info {
+            flex-grow: 1;
+        }
+        
+        .site-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+        }
+        
+        .site-desc {
+            font-size: 0.9rem;
+            color: #777;
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 40px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .sites-container {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .sites-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-box {
+                width: 90%;
+            }
+            
+            .site-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>网页导航</h1>
+            
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="搜索...">
+            </div>
+        </header>
+        
+        <div class="sites-container" id="sitesContainer">
+            <!-- 动态生成的卡片将显示在这里 -->
+        </div>
+
+        <footer>
+        </footer>
+    </div>
+
+    <script>
+        // 图标映射
+        const iconMap = {
+            '7-zip': 'fa-archive',
+            '123云盘': 'fa-cloud',
+            'adb_25.4.23': 'fa-mobile-alt',
+            'AltSnap': 'fa-window-maximize',
+            'Bandizip_7.40': 'fa-file-archive',
+            'BetterNCM': 'fa-music',
+            'Epic Games': 'fa-gamepad',
+            'Everything_1.4.1.1030': 'fa-search',
+            'ExplorerPatcher': 'fa-wrench',
+            'FirPE': 'fa-compact-disc',
+            'Fliqlo': 'fa-clock',
+            'InnoSetup编译器': 'fa-cogs',
+            'LocalSend': 'fa-share-alt',
+            'MiniPassword_Number': 'fa-key',
+            'Miside存档': 'fa-save',
+            'Motrix': 'fa-download',
+            'Nexus_24.4': 'fa-puzzle-piece',
+            'OBS': 'fa-video',
+            'PixPin': 'fa-camera',
+            'Powertoys': 'fa-tools',
+            'Python-3.13.1': 'fab fa-python',
+            'QQ': 'fab fa-qq',
+            'Rainmeter': 'fa-tachometer-alt',
+            'SketchUp 2025.0.634.273': 'fa-cube',
+            'Steam': 'fab fa-steam',
+            'steamcommunity_302': 'fa-plug',
+            'Thunder v11.1.12.1692': 'fa-bolt',
+            'Thunder v11.2.2.1716': 'fa-bolt',
+            'TransIucentTB': 'fa-desktop',
+            'UU远程': 'fa-desktop',
+            'VisualStudio Code': 'fa-code',
+            'VMware虚拟机': 'fa-server',
+            'Wallpaper Engine': 'fa-image',
+            'WPS Office 12.1.0.21541': 'fa-file-word',
+            '阿里云盘': 'fa-cloud-upload-alt',
+            '安易加速器': 'fa-tachometer-alt',
+            '百度云盘': 'fa-cloud-download-alt',
+            '哔哩哔哩': 'fa-play-circle',
+            '第五人格': 'fa-gamepad',
+            '第五人格登录器': 'fa-sign-in-alt',
+            '抖音': 'fa-video',
+            '鲁大师': 'fa-desktop',
+            '鲁大师精简版6.1024.4050.809': 'fa-desktop',
+            '迷你世界': 'fa-cube',
+            '适用于Android的Windows子系统': 'fab fa-android',
+            '顺网云电脑': 'fa-cloud',
+            '图吧工具箱': 'fa-toolbox',
+            '网易云音乐': 'fa-music',
+            '微软常用运行库合集2024.11.07': 'fa-cogs',
+            '微信': 'fab fa-weixin',
+            '微信输入法': 'fa-keyboard',
+            '微星小飞机': 'fa-microchip',
+            '无畏契约': 'fa-fist-raised',
+            '云萌Windows+激活工具': 'fa-unlock',
+            'UU加速器': 'fa-unlock',
+            '火绒_6.0.91': 'fa-unlock',
+            'Readest': 'fa-unlock',
+            'Obsidian': 'fa-unlock',
+            'Visual Studio': 'fa-unlock',
+            'Wondershare PDFelement_12.1.1.3852': 'fa-unlock',
+            'AutoHotKey': 'fa-unlock'
+        };
+
+        // 读取 link.txt 并生成卡片
+        async function loadSites() {
+            try {
+                // 首先尝试使用 fetch
+                const response = await fetch('link.txt');
+                if (!response.ok) {
+                    throw new Error('Failed to load link.txt: ' + response.status);
+                }
+                
+                const content = await response.text();
+                parseAndRender(content);
+            } catch (error) {
+                console.error('Error loading sites with fetch:', error);
+                
+                // 尝试使用 XMLHttpRequest 作为备用方案
+                try {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', 'link.txt', false); // 同步请求
+                    xhr.send();
+                    
+                    if (xhr.status === 200) {
+                        parseAndRender(xhr.responseText);
+                    } else {
+                        throw new Error('Failed to load link.txt with XHR: ' + xhr.status);
+                    }
+                } catch (xhrError) {
+                    console.error('Error loading sites with XHR:', xhrError);
+                    
+                    // 显示错误信息
+                    const container = document.getElementById('sitesContainer');
+                    container.innerHTML = `
+                        <div style="color: white; text-align: center; padding: 20px;">
+                            <h3>无法加载链接数据</h3>
+                            <p>请确保 link.txt 文件存在于同一目录</p>
+                            <p>错误信息: ${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // 解析并渲染站点数据
+        function parseAndRender(content) {
+            const lines = content.split('\n');
+            
+            const sites = [];
+            let currentSite = null;
+            
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                
+                if (trimmedLine === '-') {
+                    if (currentSite) {
+                        sites.push(currentSite);
+                    }
+                    currentSite = { url: '', name: '' };
+                } else if (currentSite) {
+                    if (!currentSite.url) {
+                        currentSite.url = trimmedLine;
+                    } else if (!currentSite.name) {
+                        currentSite.name = trimmedLine;
+                    }
+                }
+            }
+            
+            if (currentSite && currentSite.url && currentSite.name) {
+                sites.push(currentSite);
+            }
+            
+            renderSites(sites);
+        }
+
+        // 渲染卡片
+        function renderSites(sites) {
+            const container = document.getElementById('sitesContainer');
+            container.innerHTML = '';
+            
+            sites.forEach(site => {
+                const iconClass = iconMap[site.name] || 'fa-link';
+                const isFab = iconClass.startsWith('fab ');
+                
+                const card = document.createElement('a');
+                card.href = site.url;
+                card.target = '_blank';
+                card.className = 'site-card';
+                
+                card.innerHTML = `
+                    <div class="site-icon">
+                        <i class="${isFab ? 'fab' : 'fas'} ${iconClass.replace('fab ', '')}"></i>
+                    </div>
+                    <div class="site-info">
+                        <div class="site-name">${site.name}</div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // 重新绑定搜索事件
+            bindSearch();
+        }
+
+        // 搜索功能实现
+        function bindSearch() {
+            const searchInput = document.querySelector('.search-box input');
+            const siteCards = document.querySelectorAll('.site-card');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                siteCards.forEach(card => {
+                    const siteName = card.querySelector('.site-name').textContent.toLowerCase();
+                    
+                    if (siteName.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // 页面加载完成后加载站点
+        window.addEventListener('DOMContentLoaded', loadSites);
+    </script>
+</body>
+</html>
